@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import DashboardView
+from infikar.accounts.views import DashboardView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,10 +30,10 @@ urlpatterns = [
     path("accounts/profile/", DashboardView.as_view(), name="account_profile"),
     
     # App URLs
-    path("app/", include("accounts.urls")),
-    path("", include("cards.urls")),
-    path("analytics/", include("analytics.urls")),
-    path("subscriptions/", include("subscriptions.urls")),
+    path("app/", include("infikar.accounts.urls")),
+    path("", include("infikar.cards.urls")),
+    path("analytics/", include("infikar.analytics.urls")),
+    path("subscriptions/", include("infikar.subscriptions.urls")),
 ]
 
 # Serve media files in development

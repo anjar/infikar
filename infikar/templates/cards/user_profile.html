@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@{{ profile_user.username }} - Infikar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <a href="{% url 'cards:home' %}" class="text-2xl font-bold text-gray-900">Infikar</a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'cards:home' %}" class="text-gray-700 hover:text-gray-900">← Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Profile Header -->
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                        {{ profile_user.first_name.0 }}{{ profile_user.last_name.0 }}
+                    </div>
+                    <div class="ml-6">
+                        <h1 class="text-3xl font-bold text-gray-900">@{{ profile_user.username }}</h1>
+                        <p class="text-xl text-gray-600">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+                        {% if profile_user.bio %}
+                        <p class="text-gray-600 mt-2">{{ profile_user.bio }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Social Links -->
+                {% if profile_user.profile %}
+                <div class="flex flex-wrap gap-4">
+                    {% if profile_user.profile.website %}
+                    <a href="{{ profile_user.profile.website }}" class="text-blue-600 hover:text-blue-800">Website</a>
+                    {% endif %}
+                    {% if profile_user.profile.twitter %}
+                    <a href="{{ profile_user.profile.twitter }}" class="text-blue-400 hover:text-blue-600">Twitter</a>
+                    {% endif %}
+                    {% if profile_user.profile.instagram %}
+                    <a href="{{ profile_user.profile.instagram }}" class="text-pink-500 hover:text-pink-700">Instagram</a>
+                    {% endif %}
+                    {% if profile_user.profile.youtube %}
+                    <a href="{{ profile_user.profile.youtube }}" class="text-red-600 hover:text-red-800">YouTube</a>
+                    {% endif %}
+                    {% if profile_user.profile.github %}
+                    <a href="{{ profile_user.profile.github }}" class="text-gray-600 hover:text-gray-800">GitHub</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cards Grid -->
+            {% if cards %}
+            <div class="grid grid-cols-1 gap-6">
+                {% for card in cards %}
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900">{{ card.title }}</h2>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                            {{ card.get_card_type_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-gray-600">Template: {{ card.template.name }}</p>
+                        <p class="text-sm text-gray-500">Created: {{ card.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <a href="{% url 'cards:card_detail' username=profile_user.username card_slug=card.slug %}" 
+                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            View Card
+                        </a>
+                        {% if card.is_draft %}
+                        <span class="px-3 py-2 bg-yellow-100 text-yellow-800 text-sm rounded-lg">Draft</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No cards yet</h3>
+                <p class="text-gray-600">{{ profile_user.first_name }} hasn't created any cards yet.</p>
+            </div>
+            {% endif %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 mt-16">
+            <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <p class="text-gray-400">&copy; 2024 Infikar. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

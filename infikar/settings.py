@@ -66,11 +66,11 @@ INSTALLED_APPS = [
     "corsheaders",
     
     # Local apps
-    "accounts",
-    "cards",
-    "analytics",
-    "templates",
-    "subscriptions",
+    "infikar.accounts",
+    "infikar.cards",
+    "infikar.analytics",
+    "infikar.templates",
+    "infikar.subscriptions",
 ]
 
 MIDDLEWARE = [
@@ -183,7 +183,7 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_USERNAME_MIN_LENGTH = 3
-ACCOUNT_USERNAME_VALIDATORS = 'accounts.validators.custom_username_validators'
+ACCOUNT_USERNAME_VALIDATORS = 'infikar.accounts.validators.custom_username_validators'
 
 # Social account settings
 SOCIALACCOUNT_PROVIDERS = {
