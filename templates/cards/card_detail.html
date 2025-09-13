@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ card.title }} - @{{ card.user.username }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <a href="{% url 'cards:user_profile' username=card.user.username %}" class="text-2xl font-bold text-gray-900">← Back to @{{ card.user.username }}</a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'cards:home' %}" class="text-gray-700 hover:text-gray-900">Home</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Card Content -->
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <!-- Card Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ card.title }}</h1>
+                        <p class="text-lg text-gray-600">by @{{ card.user.username }}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                        {{ card.get_card_type_display }}
+                    </span>
+                </div>
+
+                <!-- Card Content based on type -->
+                {% if card.card_type == 'link' %}
+                    <!-- Link Content -->
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Links</h2>
+                        {% for link in card.link_contents.all %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <h3 class="text-lg font-medium text-gray-900">{{ link.title }}</h3>
+                            {% if link.description %}
+                            <p class="text-gray-600 mt-1">{{ link.description }}</p>
+                            {% endif %}
+                            <a href="{{ link.url }}" 
+                               class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                {{ link.link_text|default:"Visit Link" }}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                {% elif card.card_type == 'about' %}
+                    <!-- About Content -->
+                    {% for about in card.about_contents.all %}
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h2 class="text-2xl font-bold text-gray-900">{{ about.heading }}</h2>
+                            <p class="text-lg text-gray-600 mt-2">{{ about.subheading }}</p>
+                        </div>
+                        <div class="prose max-w-none">
+                            <p class="text-gray-700 text-lg leading-relaxed">{{ about.short_description }}</p>
+                        </div>
+                        {% if about.link_url %}
+                        <div class="text-center">
+                            <a href="{{ about.link_url }}" 
+                               class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                                {{ about.link_text|default:"Learn More" }}
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                {% elif card.card_type == 'recommendation' %}
+                    <!-- Recommendation Content -->
+                    {% for rec in card.recommendation_contents.all %}
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h2 class="text-2xl font-bold text-gray-900">{{ rec.title }}</h2>
+                            <p class="text-lg text-gray-600 mt-2">{{ rec.subtitle }}</p>
+                            <p class="text-gray-500 mt-4">{{ rec.subscription_text }}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {% for pick in rec.picks.all %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ pick.title }}</h3>
+                                <p class="text-gray-600 mt-2">{{ pick.description }}</p>
+                                {% if pick.link_url %}
+                                <a href="{{ pick.link_url }}" 
+                                   class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                    {{ pick.link_text|default:"Check it out" }}
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                {% elif card.card_type == 'splash' %}
+                    <!-- Splash Content -->
+                    {% for splash in card.splash_contents.all %}
+                    <div class="text-center space-y-6">
+                        <h2 class="text-3xl font-bold text-gray-900">{{ splash.heading }}</h2>
+                        <p class="text-xl text-gray-600">{{ splash.subheading }}</p>
+                        <p class="text-gray-700 text-lg">{{ splash.description }}</p>
+                        {% if splash.link_url %}
+                        <div>
+                            <a href="{{ splash.link_url }}" 
+                               class="inline-block bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700">
+                                {{ splash.link_text|default:"Get Started" }}
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                {% elif card.card_type == 'youtube' %}
+                    <!-- YouTube Content -->
+                    {% for youtube in card.youtube_contents.all %}
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h2 class="text-2xl font-bold text-gray-900">{{ youtube.title }}</h2>
+                            <p class="text-lg text-gray-600 mt-2">{{ youtube.subtitle }}</p>
+                            <p class="text-gray-700 mt-4">{{ youtube.description }}</p>
+                        </div>
+                        <div class="text-center">
+                            <a href="{{ youtube.channel_url }}" 
+                               class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
+                                {{ youtube.button_label|default:"Subscribe" }}
+                            </a>
+                        </div>
+                        {% if youtube.videos.exists %}
+                        <div class="mt-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">Latest Videos</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {% for video in youtube.videos.all %}
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <h4 class="font-medium text-gray-900">{{ video.title }}</h4>
+                                    <a href="{{ video.video_url }}" 
+                                       class="inline-block mt-2 text-blue-600 hover:text-blue-800">
+                                        Watch Video →
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                {% else %}
+                    <!-- Default content -->
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-gray-900">{{ card.title }}</h2>
+                        <p class="text-gray-600 mt-4">This card type is not yet implemented.</p>
+                    </div>
+                {% endif %}
+
+                <!-- Card Footer -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span>Template: {{ card.template.name }}</span>
+                        <span>Created: {{ card.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 mt-16">
+            <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <p class="text-gray-400">&copy; 2024 Infikar. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

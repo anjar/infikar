@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "infikar"
+version = "0.1.0"
+description = "Bio sites platform for content creators"
+authors = ["Infikar Team <team@infikar.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^5.2.6"
+django-allauth = "^65.11.2"
+pillow = "^11.3.0"
+python-decouple = "^3.8"
+django-extensions = "^4.1"
+django-cors-headers = "^4.8.0"
+celery = "^5.5.3"
+redis = "^6.4.0"
+django-redis = "^6.0.0"
+# mysqlclient = "^2.2.4"  # Commented out for development, use SQLite
+django-environ = "^0.11.2"
+requests = "^2.32.3"
+beautifulsoup4 = "^4.12.3"
+google-api-python-client = "^2.150.0"
+django-ratelimit = "^4.1.0"
+django-crispy-forms = "^2.3"
+crispy-tailwind = "^0.5.0"
+PyJWT = "^2.8.0"
+cryptography = "^43.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-django = "^4.8.0"
+black = "^24.0.0"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
