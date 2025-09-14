@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Username - Infikar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">Choose Your Username</h1>
+                <p class="mt-2 text-sm text-gray-600">
+                    This will be your unique URL: <span class="font-mono text-blue-600">infikar.com/@<span id="username-preview">username</span></span>
+                </p>
+                <p class="mt-1 text-xs text-gray-500">
+                    Current URL: <span class="font-mono">/app/onboard/</span>
+                </p>
+            </div>
+
+            <!-- Username Setup Form -->
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <form method="post" id="username-form" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Username Input -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700">
+                            Username
+                        </label>
+                        <div class="mt-1 relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">@</span>
+                            </div>
+                            <input type="text" 
+                                   name="username" 
+                                   id="username"
+                                   class="form-input pl-8"
+                                   placeholder="your-username"
+                                   required
+                                   autocomplete="off">
+                        </div>
+                        <div id="username-feedback" class="mt-2 text-sm"></div>
+                        <div id="typing-indicator" class="mt-1 text-xs text-gray-500 hidden">
+                            <span class="inline-flex items-center">
+                                <svg class="animate-spin -ml-1 mr-1 h-3 w-3 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Checking availability...
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Username Rules -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-900 mb-2">Username Rules:</h3>
+                        <ul class="text-xs text-gray-600 space-y-1">
+                            <li>• 4-30 characters long</li>
+                            <li>• Only letters, numbers, dots, hyphens, and underscores</li>
+                            <li>• Cannot start or end with a dot or hyphen</li>
+                            <li>• Cannot have consecutive dots or hyphens</li>
+                            <li>• Cannot be a reserved word (admin, support, etc.)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div>
+                        <button type="submit" 
+                                id="submit-btn"
+                                disabled
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-400 cursor-not-allowed transition-colors">
+                            Complete Setup
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Back to Signup -->
+            <div class="text-center">
+                <p class="text-sm text-gray-600">
+                    Need to change something? 
+                    <a href="{% url 'accounts:signup' %}" class="font-medium text-blue-600 hover:text-blue-500">
+                        Go back to signup
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .form-input {
+            @apply appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm;
+        }
+        
+        .form-input:focus {
+            @apply ring-2 ring-blue-500 border-blue-500;
+        }
+        
+        .btn-enabled {
+            @apply bg-blue-600 hover:bg-blue-700 cursor-pointer;
+        }
+        
+        .btn-disabled {
+            @apply bg-gray-400 cursor-not-allowed;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('username');
+            const usernamePreview = document.getElementById('username-preview');
+            const usernameFeedback = document.getElementById('username-feedback');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const submitBtn = document.getElementById('submit-btn');
+            const form = document.getElementById('username-form');
+            
+            let isChecking = false;
+            let isAvailable = false;
+            let debounceTimer = null;
+            let lastCheckedUsername = '';
+            
+            // Debounce function
+            function debounce(func, wait) {
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(debounceTimer);
+                        func(...args);
+                    };
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(later, wait);
+                };
+            }
+            
+            // Update preview as user types
+            usernameInput.addEventListener('input', function() {
+                const username = this.value.trim();
+                usernamePreview.textContent = username || 'username';
+                
+                if (username.length >= 4) {
+                    // Debounced username check
+                    debouncedCheckUsername(username);
+                } else {
+                    resetFeedback();
+                }
+            });
+            
+            // Debounced username availability check (500ms delay)
+            const debouncedCheckUsername = debounce(function(username) {
+                // Skip if we're already checking this username
+                if (username === lastCheckedUsername && isChecking) {
+                    return;
+                }
+                
+                // Skip if username is too short
+                if (username.length < 4) {
+                    return;
+                }
+                
+                // Show typing indicator
+                typingIndicator.classList.remove('hidden');
+                usernameFeedback.innerHTML = '';
+                
+                checkUsernameAvailability(username);
+            }, 500);
+            
+            function checkUsernameAvailability(username) {
+                // Prevent duplicate requests for the same username
+                if (isChecking && lastCheckedUsername === username) {
+                    return;
+                }
+                
+                isChecking = true;
+                lastCheckedUsername = username;
+                typingIndicator.classList.add('hidden');
+                usernameFeedback.innerHTML = '<span class="text-blue-600">Checking availability...</span>';
+                submitBtn.disabled = true;
+                submitBtn.className = submitBtn.className.replace('btn-enabled', 'btn-disabled');
+                
+                fetch('{% url "accounts:check_username" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ username: username })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    isChecking = false;
+                    isAvailable = data.available;
+                    
+                    // Only update UI if this is still the current username being checked
+                    if (username === lastCheckedUsername) {
+                        if (data.available) {
+                            usernameFeedback.innerHTML = '<span class="text-green-600">✓ Username is available!</span>';
+                            submitBtn.disabled = false;
+                            submitBtn.className = submitBtn.className.replace('btn-disabled', 'btn-enabled');
+                        } else {
+                            usernameFeedback.innerHTML = `<span class="text-red-600">✗ ${data.message}</span>`;
+                            submitBtn.disabled = true;
+                            submitBtn.className = submitBtn.className.replace('btn-enabled', 'btn-disabled');
+                        }
+                    }
+                })
+                .catch(error => {
+                    isChecking = false;
+                    // Only update UI if this is still the current username being checked
+                    if (username === lastCheckedUsername) {
+                        usernameFeedback.innerHTML = '<span class="text-red-600">Error checking username. Please try again.</span>';
+                        submitBtn.disabled = true;
+                        submitBtn.className = submitBtn.className.replace('btn-enabled', 'btn-disabled');
+                    }
+                });
+            }
+            
+            function resetFeedback() {
+                // Clear any pending debounced checks
+                if (debounceTimer) {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = null;
+                }
+                
+                typingIndicator.classList.add('hidden');
+                usernameFeedback.innerHTML = '';
+                submitBtn.disabled = true;
+                submitBtn.className = submitBtn.className.replace('btn-enabled', 'btn-disabled');
+                isAvailable = false;
+                lastCheckedUsername = '';
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!isAvailable) {
+                    e.preventDefault();
+                    alert('Please choose an available username');
+                }
+            });
+            
+            // Clean up on page unload
+            window.addEventListener('beforeunload', function() {
+                if (debounceTimer) {
+                    clearTimeout(debounceTimer);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

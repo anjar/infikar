@@ -19,7 +19,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from infikar.accounts.views import DashboardView
 from infikar.health import health_check
 
 urlpatterns = [
@@ -28,12 +27,7 @@ urlpatterns = [
     # Health check
     path("health/", health_check, name="health_check"),
     
-    # Authentication URLs
-    path("accounts/", include("allauth.urls")),
-    # Profile redirect (for allauth compatibility)
-    path("accounts/profile/", DashboardView.as_view(), name="account_profile"),
-    
-    # App URLs
+    # App URLs (authentication and dashboard)
     path("app/", include("infikar.accounts.urls")),
     path("", include("infikar.cards.urls")),
     path("analytics/", include("infikar.analytics.urls")),

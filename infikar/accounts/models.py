@@ -24,7 +24,9 @@ class User(AbstractUser):
         max_length=30,
         unique=True,
         validators=[username_validator],
-        help_text='Required. 30 characters or fewer. Letters, numbers, dots, hyphens, and underscores only.'
+        help_text='Required. 4-30 characters. Letters, numbers, dots, hyphens, and underscores only.',
+        blank=True,
+        null=True
     )
     
     email = models.EmailField(unique=True)

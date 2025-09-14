@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from .models import Card, CardTemplate
 
 User = get_user_model()
@@ -47,3 +49,21 @@ class CardDetailView(DetailView):
             slug=card_slug,
             is_published=True
         )
+
+
+class DashboardView(TemplateView):
+    """User dashboard for creating/managing cards"""
+    template_name = 'cards/dashboard.html'
+    
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['user'] = user
+        context['cards'] = user.cards.all().order_by('-created_at')
+        context['card_count'] = user.cards.count()
+        context['card_limit'] = user.get_card_limit()
+        return context
