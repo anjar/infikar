@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Card - Infikar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <a href="{% url 'cards:home' %}" class="text-2xl font-bold text-primary">Infikar</a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'app:create' %}" class="text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Edit
+                        </a>
+                        <a href="{% url 'app:dashboard' %}" class="text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Preview Content -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h1 class="text-2xl font-bold text-gray-900">Card Preview</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                            <i class="fas fa-eye mr-1"></i>Preview Mode
+                        </span>
+                    </div>
+                </div>
+                <p class="text-gray-600">This is how your card will look to visitors. Make changes and preview again, or publish when ready.</p>
+            </div>
+
+            <!-- Card Preview -->
+            <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+                <div class="text-center">
+                    <!-- Card Image -->
+                    {% if card.card_image %}
+                        <img src="{{ card.card_image.url }}" alt="{{ card.title }}" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                    {% else %}
+                        <div class="w-24 h-24 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-user text-white text-2xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Card Title -->
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ card.title }}</h2>
+                    
+                    <!-- Links Preview -->
+                    {% if card._preview_links %}
+                        <div class="space-y-3 mt-6">
+                            {% for link in card._preview_links %}
+                                <a href="{{ link.url }}" class="block w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors text-center">
+                                    {{ link.link_text|default:link.title }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-gray-500 mt-6">
+                            <i class="fas fa-link text-2xl mb-2"></i>
+                            <p>No links added yet</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Social Media Preview -->
+                    {% if card.social_links %}
+                        <div class="flex justify-center space-x-4 mt-6">
+                            {% for platform, data in card.social_links.items %}
+                                <a href="{{ data.url }}" class="text-gray-600 hover:text-primary transition-colors">
+                                    <i class="fab fa-{{ platform }} text-xl"></i>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 mt-8">
+                <a href="{% url 'app:create' %}" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-edit mr-2"></i>Edit Card
+                </a>
+                <form method="post" action="{% url 'app:create' %}" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="card_type" value="link">
+                    <input type="hidden" name="title" value="{{ card.title }}">
+                    <input type="hidden" name="template" value="{{ card.template_id }}">
+                    {% for link in card._preview_links %}
+                        <input type="hidden" name="links[{{ forloop.counter }}][title]" value="{{ link.title }}">
+                        <input type="hidden" name="links[{{ forloop.counter }}][url]" value="{{ link.url }}">
+                        <input type="hidden" name="links[{{ forloop.counter }}][link_text]" value="{{ link.link_text }}">
+                        <input type="hidden" name="links[{{ forloop.counter }}][description]" value="{{ link.description }}">
+                    {% endfor %}
+                    {% for platform, data in card.social_links.items %}
+                        <input type="hidden" name="social[{{ forloop.counter }}][platform]" value="{{ platform }}">
+                        <input type="hidden" name="social[{{ forloop.counter }}][url]" value="{{ data.url }}">
+                    {% endfor %}
+                    <button type="submit" name="action" value="publish" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-rocket mr-2"></i>Publish Card
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

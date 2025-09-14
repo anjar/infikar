@@ -69,6 +69,12 @@ class Card(models.Model):
     ], default='none')
     custom_background_color = models.CharField(max_length=7, default='#ffffff')  # Hex color
     
+    # Social media links (JSON field for flexibility)
+    social_links = models.JSONField(default=dict, blank=True)
+    
+    # Card image override
+    card_image = models.ImageField(upload_to='cards/card_images/', blank=True, null=True)
+    
     # Ordering
     sort_order = models.PositiveIntegerField(default=0)
     

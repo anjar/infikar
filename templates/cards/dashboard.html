@@ -23,7 +23,7 @@
                         <a href="/@{{ user.username }}/" class="text-gray-700 hover:text-gray-900" target="_blank">
                             View Profile
                         </a>
-                        <a href="{% url 'account_logout' %}" class="text-gray-700 hover:text-gray-900">
+                        <a href="{% url 'accounts:logout' %}" class="text-gray-700 hover:text-gray-900">
                             Sign Out
                         </a>
                     </div>
@@ -49,7 +49,7 @@
 
             <!-- Quick Actions -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <a href="{% url 'app:create' %}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                     <div class="flex items-center">
                         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@
                             </div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">No cards yet</h3>
                             <p class="text-gray-600 mb-4">Create your first card to get started</p>
-                            <a href="#" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                            <a href="{% url 'app:create' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                                 Create Your First Card
                             </a>
                         </div>

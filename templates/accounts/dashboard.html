@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Infikar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <h1 class="text-2xl font-bold text-gray-900">Infikar</h1>
+                        <span class="text-sm text-gray-500">Dashboard</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">{{ user.username|first|upper }}</span>
+                            </div>
+                            <span class="text-gray-700 font-medium">@{{ user.username }}</span>
+                        </div>
+                        <a href="{% url 'accounts:logout' %}" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Welcome Section -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ user.first_name|default:user.username }}!</h2>
+                <p class="text-gray-600">Manage your bio sites and create amazing link collections.</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-link text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Cards</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ card_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-eye text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Published</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ cards|length }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                            <i class="fas fa-chart-line text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">This Month</p>
+                            <p class="text-2xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="{% url 'app:create' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="p-2 bg-primary text-white rounded-lg mr-3">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">Create Card</p>
+                            <p class="text-sm text-gray-500">New bio site</p>
+                        </div>
+                    </a>
+                    
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="p-2 bg-green-500 text-white rounded-lg mr-3">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">Templates</p>
+                            <p class="text-sm text-gray-500">Browse designs</p>
+                        </div>
+                    </button>
+                    
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="p-2 bg-yellow-500 text-white rounded-lg mr-3">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">Analytics</p>
+                            <p class="text-sm text-gray-500">View insights</p>
+                        </div>
+                    </button>
+                    
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="p-2 bg-red-500 text-white rounded-lg mr-3">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900">Settings</p>
+                            <p class="text-sm text-gray-500">Account settings</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards Management -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Your Cards</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">{{ card_count }}/{{ card_limit }} cards used</span>
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: {% widthratio card_count card_limit 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    {% if cards %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {% for card in cards %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">{{ card.title }}</h4>
+                                        <p class="text-sm text-gray-500">{{ card.get_card_type_display }}</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        {% if card.is_published %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Published
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-edit mr-1"></i>
+                                                Draft
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <p class="text-sm text-gray-600 mb-2">Preview URL:</p>
+                                    <div class="flex items-center space-x-2">
+                                        <code class="text-xs bg-gray-100 px-2 py-1 rounded flex-1 truncate">
+                                            infikar.com/@{{ user.username }}/{{ card.slug }}
+                                        </code>
+                                        <button class="text-gray-400 hover:text-gray-600" onclick="copyToClipboard('infikar.com/@{{ user.username }}/{{ card.slug }}')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-calendar mr-1"></i>
+                                            {{ card.created_at|date:"M d, Y" }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'app:manage' card.id %}" class="text-gray-400 hover:text-gray-600" title="Manage">
+                                            <i class="fas fa-cog"></i>
+                                        </a>
+                                        <button class="text-gray-400 hover:text-gray-600" title="Duplicate">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <button class="text-red-400 hover:text-red-600" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-12">
+                            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-link text-3xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No cards yet</h3>
+                            <p class="text-gray-500 mb-6">Create your first bio site to get started</p>
+                            <a href="{% url 'app:create' %}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Create Your First Card
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Subscription Status -->
+            {% if not user.is_pro_user %}
+            <div class="mt-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Upgrade to Pro</h3>
+                        <p class="text-purple-100 mb-4">Unlock unlimited cards, custom domains, and advanced analytics</p>
+                        <button class="bg-white text-purple-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                            Upgrade Now
+                        </button>
+                    </div>
+                    <div class="hidden md:block">
+                        <i class="fas fa-crown text-4xl text-yellow-300"></i>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                const button = event.target.closest('button');
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

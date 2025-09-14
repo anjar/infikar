@@ -12,9 +12,6 @@ urlpatterns = [
     # Onboard
     path('onboard/', views.OnboardView.as_view(), name='onboard'),
     
-    # Dashboard
-    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
-    
     # AJAX endpoints
     path('check-username/', views.check_username_availability, name='check_username'),
 ]

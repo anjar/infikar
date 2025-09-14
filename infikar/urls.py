@@ -27,9 +27,16 @@ urlpatterns = [
     # Health check
     path("health/", health_check, name="health_check"),
     
-    # App URLs (authentication and dashboard)
-    path("app/", include("infikar.accounts.urls")),
+    # Authentication URLs
+    path("auth/", include("infikar.accounts.urls")),
+    
+    # Public URLs (home and user profiles)
     path("", include("infikar.cards.urls")),
+    
+    # App URLs (dashboard and cards)
+    path("app/", include("infikar.cards.app_urls")),
+    
+    # Analytics and subscriptions
     path("analytics/", include("infikar.analytics.urls")),
     path("subscriptions/", include("infikar.subscriptions.urls")),
 ]

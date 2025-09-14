@@ -24,7 +24,7 @@ class CustomSignupView(TemplateView):
         if request.user.is_authenticated:
             if not request.user.username:
                 return redirect('accounts:onboard')
-            return redirect('accounts:dashboard')
+            return redirect('app:dashboard')
         return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
@@ -68,7 +68,7 @@ class OnboardView(TemplateView):
         
         # Redirect users who already have username to dashboard
         if request.user.username:
-            return redirect('accounts:dashboard')
+            return redirect('app:dashboard')
         
         return super().dispatch(request, *args, **kwargs)
     
@@ -113,14 +113,14 @@ class CustomLoginView(LoginView):
         if request.user.is_authenticated:
             if not request.user.username:
                 return redirect('accounts:onboard')
-            return redirect('accounts:dashboard')
+            return redirect('app:dashboard')
         return super().dispatch(request, *args, **kwargs)
     
     def get_success_url(self):
         # Check if user has username after login
         if not self.request.user.username:
             return reverse_lazy('accounts:onboard')
-        return reverse_lazy('accounts:dashboard')
+        return reverse_lazy('app:dashboard')
 
 
 class DashboardView(TemplateView):

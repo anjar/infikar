@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage {{ card.title }} - Infikar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'app:dashboard' %}" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">{{ card.title }}</h1>
+                            <p class="text-sm text-gray-500">{{ card.get_card_type_display }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">{{ user.username|first|upper }}</span>
+                            </div>
+                            <span class="text-gray-700 font-medium">@{{ user.username }}</span>
+                        </div>
+                        <a href="{% url 'accounts:logout' %}" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Card Status and Actions -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            {% if card.is_published %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Published
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Draft
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            {{ link_count }}/{{ link_limit }} links
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <form method="post" action="{% url 'cards:publish' card.id %}" class="inline">
+                            {% csrf_token %}
+                            {% if not card.is_published %}
+                                <button type="submit" name="action" value="publish" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    Publish
+                                </button>
+                            {% endif %}
+                            {% if is_pro %}
+                                <button type="submit" name="action" value="draft" class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Save as Draft
+                                </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Links Management -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Links</h2>
+                    {% if link_count < link_limit %}
+                        <a href="{% url 'cards:link_add' card.id %}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Link
+                        </a>
+                    {% else %}
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Link limit reached ({{ link_limit }})
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if links %}
+                    <div id="links-list" class="space-y-3">
+                        {% for link in links %}
+                            <div class="link-item border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-link-id="{{ link.id }}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4 flex-1">
+                                        <div class="drag-handle cursor-move text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-grip-vertical"></i>
+                                        </div>
+                                        
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-3">
+                                                {% if link.image %}
+                                                    <img src="{{ link.image.url }}" alt="{{ link.title }}" class="w-12 h-12 rounded-lg object-cover">
+                                                {% else %}
+                                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-link text-gray-400"></i>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <div class="flex-1">
+                                                    <h3 class="font-medium text-gray-900">{{ link.title }}</h3>
+                                                    <p class="text-sm text-gray-500">{{ link.url }}</p>
+                                                    {% if link.description %}
+                                                        <p class="text-sm text-gray-600 mt-1">{{ link.description|truncatechars:100 }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'cards:link_edit' link.id %}" class="text-gray-400 hover:text-blue-600 transition-colors">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'cards:link_delete' link.id %}" class="text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Are you sure you want to delete this link?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-link text-3xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No links yet</h3>
+                        <p class="text-gray-500 mb-6">Add your first link to get started</p>
+                        {% if link_count < link_limit %}
+                            <a href="{% url 'cards:link_add' card.id %}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Your First Link
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Social Media Management -->
+            {% if card.card_type == 'link' %}
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Social Media Links</h2>
+                    <div class="text-sm text-gray-500">
+                        Click on icons to add social media links (max 5)
+                    </div>
+                </div>
+                
+                <!-- Social Media Icons -->
+                <div class="grid grid-cols-5 gap-4 mb-6">
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="twitter">
+                        <i class="fab fa-twitter text-2xl text-blue-400 mb-2"></i>
+                        <p class="text-xs text-gray-600">Twitter</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="instagram">
+                        <i class="fab fa-instagram text-2xl text-pink-500 mb-2"></i>
+                        <p class="text-xs text-gray-600">Instagram</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="linkedin">
+                        <i class="fab fa-linkedin text-2xl text-blue-600 mb-2"></i>
+                        <p class="text-xs text-gray-600">LinkedIn</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="github">
+                        <i class="fab fa-github text-2xl text-gray-800 mb-2"></i>
+                        <p class="text-xs text-gray-600">GitHub</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="youtube">
+                        <i class="fab fa-youtube text-2xl text-red-600 mb-2"></i>
+                        <p class="text-xs text-gray-600">YouTube</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="facebook">
+                        <i class="fab fa-facebook text-2xl text-blue-700 mb-2"></i>
+                        <p class="text-xs text-gray-600">Facebook</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="tiktok">
+                        <i class="fab fa-tiktok text-2xl text-black mb-2"></i>
+                        <p class="text-xs text-gray-600">TikTok</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="discord">
+                        <i class="fab fa-discord text-2xl text-indigo-600 mb-2"></i>
+                        <p class="text-xs text-gray-600">Discord</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="telegram">
+                        <i class="fab fa-telegram text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-xs text-gray-600">Telegram</p>
+                    </div>
+                    <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="other">
+                        <i class="fas fa-link text-2xl text-gray-500 mb-2"></i>
+                        <p class="text-xs text-gray-600">Other</p>
+                    </div>
+                </div>
+                
+                <div id="social-media-list" class="space-y-3">
+                    {% for platform, data in card.social_links.items %}
+                        <div class="social-item border border-gray-200 rounded-lg p-4 bg-gray-50" data-platform="{{ platform }}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-{{ platform|default:'link' }} text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">{{ platform|title }}</h3>
+                                        <p class="text-sm text-gray-500">{{ data.url }}</p>
+                                        {% if data.text %}
+                                            <p class="text-sm text-gray-600">{{ data.text }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="edit-social-btn text-gray-400 hover:text-blue-600 transition-colors" data-platform="{{ platform }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="remove-social-btn text-gray-400 hover:text-red-600 transition-colors" data-platform="{{ platform }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-share-alt text-3xl mb-4"></i>
+                            <p>No social media links added yet</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Initialize drag and drop
+        document.addEventListener('DOMContentLoaded', function() {
+            const linksList = document.getElementById('links-list');
+            if (linksList) {
+                const sortable = Sortable.create(linksList, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'opacity-50',
+                    onEnd: function(evt) {
+                        // Get new order
+                        const linkItems = linksList.querySelectorAll('.link-item');
+                        const linkOrders = Array.from(linkItems).map((item, index) => ({
+                            id: item.dataset.linkId,
+                            order: index
+                        }));
+                        
+                        // Send to server
+                        fetch('{% url "cards:link_reorder" card.id %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({
+                                link_orders: linkOrders
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                console.log('Links reordered successfully');
+                            } else {
+                                console.error('Error reordering links:', data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    }
+                });
+            }
+            
+            // Social media management
+            const socialList = document.getElementById('social-media-list');
+            const socialIconOptions = document.querySelectorAll('.social-icon-option');
+            const maxSocialLinks = 5;
+            let socialCount = {{ card.social_links|length }};
+            let addedSocialPlatforms = new Set();
+            
+            // Initialize added platforms from existing social links
+            {% for platform, data in card.social_links.items %}
+                addedSocialPlatforms.add('{{ platform }}');
+            {% endfor %}
+            
+            // Update icon states
+            updateSocialIconStates();
+            
+            socialIconOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const platform = this.dataset.platform;
+                    
+                    if (addedSocialPlatforms.has(platform)) {
+                        return; // Already added
+                    }
+                    
+                    if (socialCount >= maxSocialLinks) {
+                        alert(`Maximum ${maxSocialLinks} social media links allowed`);
+                        return;
+                    }
+                    
+                    addSocialMedia(platform);
+                });
+            });
+            
+            function updateSocialIconStates() {
+                socialIconOptions.forEach(option => {
+                    const platform = option.dataset.platform;
+                    if (addedSocialPlatforms.has(platform)) {
+                        option.classList.add('border-primary', 'bg-primary/5');
+                        option.classList.remove('border-gray-200');
+                    } else {
+                        option.classList.remove('border-primary', 'bg-primary/5');
+                        option.classList.add('border-gray-200');
+                    }
+                });
+            }
+            
+            // Remove social media
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-social-btn')) {
+                    const platform = e.target.closest('.remove-social-btn').dataset.platform;
+                    if (confirm(`Remove ${platform} social media link?`)) {
+                        removeSocialMedia(platform);
+                    }
+                }
+            });
+            
+            function showSocialForm() {
+                const formHtml = `
+                    <div id="social-form" class="border border-gray-200 rounded-lg p-4 bg-blue-50">
+                        <h3 class="font-medium text-gray-900 mb-4">Add Social Media Link</h3>
+                        <form id="social-form-element">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                                    <select name="platform" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Choose platform</option>
+                                        <option value="twitter">Twitter</option>
+                                        <option value="instagram">Instagram</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                        <option value="facebook">Facebook</option>
+                                        <option value="youtube">YouTube</option>
+                                        <option value="tiktok">TikTok</option>
+                                        <option value="github">GitHub</option>
+                                        <option value="discord">Discord</option>
+                                        <option value="telegram">Telegram</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                                    <input type="url" name="url" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://example.com">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Display Text (optional)</label>
+                                    <input type="text" name="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Custom display text">
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-end space-x-3 mt-4">
+                                <button type="button" id="cancel-social" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    Add Social Media
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                socialList.insertAdjacentHTML('beforeend', formHtml);
+                
+                // Handle form submission
+                document.getElementById('social-form-element').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    addSocialMedia(formData);
+                });
+                
+                // Handle cancel
+                document.getElementById('cancel-social').addEventListener('click', function() {
+                    document.getElementById('social-form').remove();
+                });
+            }
+            
+            function addSocialMedia(platform) {
+                socialCount++;
+                addedSocialPlatforms.add(platform);
+                
+                const socialForm = createSocialForm(platform, socialCount);
+                socialList.appendChild(socialForm);
+                
+                // Update icon appearance
+                updateSocialIconStates();
+            }
+            
+            function createSocialItem(platform, data) {
+                const div = document.createElement('div');
+                div.className = 'social-item border border-gray-200 rounded-lg p-4 bg-gray-50';
+                div.dataset.platform = platform;
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-${platform} text-gray-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">${platform.charAt(0).toUpperCase() + platform.slice(1)}</h3>
+                                <p class="text-sm text-gray-500">${data.url}</p>
+                                ${data.text ? `<p class="text-sm text-gray-600">${data.text}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="edit-social-btn text-gray-400 hover:text-blue-600 transition-colors" data-platform="${platform}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="remove-social-btn text-gray-400 hover:text-red-600 transition-colors" data-platform="${platform}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return div;
+            }
+            
+            function createSocialForm(platform, index) {
+                const socialDiv = document.createElement('div');
+                socialDiv.className = 'social-item border border-gray-200 rounded-lg p-4 bg-gray-50';
+                socialDiv.dataset.platform = platform;
+                socialDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fab fa-${platform} text-2xl text-gray-600"></i>
+                            <h3 class="font-medium text-gray-900">${platform.charAt(0).toUpperCase() + platform.slice(1)}</h3>
+                        </div>
+                        <button type="button" class="remove-social-btn text-red-500 hover:text-red-700" data-platform="${platform}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                        <input type="url" name="social[${index}][url]" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="https://example.com">
+                        <input type="hidden" name="social[${index}][platform]" value="${platform}">
+                    </div>
+                `;
+                
+                // Add remove functionality
+                const removeBtn = socialDiv.querySelector('.remove-social-btn');
+                removeBtn.addEventListener('click', function() {
+                    socialDiv.remove();
+                    socialCount--;
+                    addedSocialPlatforms.delete(platform);
+                    updateSocialIconStates();
+                    updateSocialMediaOnServer();
+                });
+                
+                return socialDiv;
+            }
+            
+            function removeSocialMedia(platform) {
+                const socialItem = document.querySelector(`[data-platform="${platform}"]`);
+                if (socialItem) {
+                    socialItem.remove();
+                    socialCount--;
+                    updateSocialMediaOnServer();
+                }
+            }
+            
+            function updateSocialMediaOnServer() {
+                const socialItems = document.querySelectorAll('.social-item');
+                const socialData = {};
+                
+                socialItems.forEach(item => {
+                    const platform = item.dataset.platform;
+                    const url = item.querySelector('p.text-gray-500').textContent;
+                    const text = item.querySelector('p.text-gray-600')?.textContent || platform.charAt(0).toUpperCase() + platform.slice(1);
+                    socialData[platform] = { url, text };
+                });
+                
+                // Send to server
+                fetch('{% url "app:manage" card.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        action: 'update_social',
+                        social_links: socialData
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('Social media updated successfully');
+                    } else {
+                        console.error('Error updating social media:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

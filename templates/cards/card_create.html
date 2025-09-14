@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Card - Infikar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'app:dashboard' %}" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <h1 class="text-2xl font-bold text-gray-900">Create New Card</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">{{ user.username|first|upper }}</span>
+                            </div>
+                            <span class="text-gray-700 font-medium">@{{ user.username }}</span>
+                        </div>
+                        <a href="{% url 'accounts:logout' %}" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Step 1: Card Type Selection -->
+            <div id="step-1" class="step">
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Choose Your Card Type</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="card-type-option border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-type="link">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-link text-blue-500 mr-2"></i>
+                                <h3 class="font-medium text-gray-900">Link Collection</h3>
+                            </div>
+                            <p class="text-sm text-gray-600">Share multiple links in one place</p>
+                        </div>
+                        
+                        <div class="card-type-option border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-type="about">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-user text-green-500 mr-2"></i>
+                                <h3 class="font-medium text-gray-900">About</h3>
+                            </div>
+                            <p class="text-sm text-gray-600">Tell your story and showcase yourself</p>
+                        </div>
+                        
+                        <div class="card-type-option border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-type="recommendation">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                <h3 class="font-medium text-gray-900">Recommendations</h3>
+                            </div>
+                            <p class="text-sm text-gray-600">Share your top picks and favorites</p>
+                        </div>
+                        
+                        <div class="card-type-option border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-type="youtube">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-play text-red-500 mr-2"></i>
+                                <h3 class="font-medium text-gray-900">YouTube Channel</h3>
+                            </div>
+                            <p class="text-sm text-gray-600">Showcase your YouTube content</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Template Selection -->
+            <div id="step-2" class="step hidden">
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900">Choose a Template</h2>
+                        <button id="back-to-type" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Card Type
+                        </button>
+                    </div>
+                    
+                    <div id="template-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Templates will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Forms -->
+            <div id="form-container" class="hidden">
+                <!-- Link Collection Form -->
+                <div id="link-collection-form" class="card-type-form hidden">
+                    <form method="post" id="link-collection-create-form" class="space-y-8">
+                        {% csrf_token %}
+                        <input type="hidden" name="card_type" value="link">
+                        
+                        <!-- Card Details Section -->
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-gray-900">Card Details</h2>
+                                <button id="back-to-template" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-arrow-left mr-2"></i>Back to Templates
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Title -->
+                                <div class="md:col-span-2">
+                                    <label for="card-title" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Card Title
+                                    </label>
+                                    <input type="text" id="card-title" name="title" required
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Enter card title">
+                                </div>
+                                
+                                <!-- Card Image Override -->
+                                <div class="md:col-span-2">
+                                    <label for="card-image" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Card Image (Optional)
+                                    </label>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-1">
+                                            <input type="file" id="card-image" name="card_image" accept="image/*"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            Leave empty to use template default
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Template Info (Hidden) -->
+                                <input type="hidden" id="selected-template" name="template" value="">
+                            </div>
+                        </div>
+                        
+                        <!-- Links Management Section -->
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-gray-900">Links</h2>
+                                <button type="button" id="add-link-btn" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Add Link
+                                </button>
+                            </div>
+                            
+                            <div id="links-container" class="space-y-4">
+                                <!-- Links will be added here dynamically -->
+                            </div>
+                            
+                            <div id="no-links-message" class="text-center py-8 text-gray-500">
+                                <i class="fas fa-link text-3xl mb-4"></i>
+                                <p>No links added yet. Click "Add Link" to get started.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media Section -->
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <h2 class="text-lg font-semibold text-gray-900 mb-6">Social Media Links</h2>
+                            <p class="text-sm text-gray-500 mb-4">Click on icons to add social media links (max 5)</p>
+                            
+                            <!-- Social Media Icons -->
+                            <div class="grid grid-cols-5 gap-4 mb-6">
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="twitter">
+                                    <i class="fab fa-twitter text-2xl text-blue-400 mb-2"></i>
+                                    <p class="text-xs text-gray-600">Twitter</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="instagram">
+                                    <i class="fab fa-instagram text-2xl text-pink-500 mb-2"></i>
+                                    <p class="text-xs text-gray-600">Instagram</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="linkedin">
+                                    <i class="fab fa-linkedin text-2xl text-blue-600 mb-2"></i>
+                                    <p class="text-xs text-gray-600">LinkedIn</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="github">
+                                    <i class="fab fa-github text-2xl text-gray-800 mb-2"></i>
+                                    <p class="text-xs text-gray-600">GitHub</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="youtube">
+                                    <i class="fab fa-youtube text-2xl text-red-600 mb-2"></i>
+                                    <p class="text-xs text-gray-600">YouTube</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="facebook">
+                                    <i class="fab fa-facebook text-2xl text-blue-700 mb-2"></i>
+                                    <p class="text-xs text-gray-600">Facebook</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="tiktok">
+                                    <i class="fab fa-tiktok text-2xl text-black mb-2"></i>
+                                    <p class="text-xs text-gray-600">TikTok</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="discord">
+                                    <i class="fab fa-discord text-2xl text-indigo-600 mb-2"></i>
+                                    <p class="text-xs text-gray-600">Discord</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="telegram">
+                                    <i class="fab fa-telegram text-2xl text-blue-500 mb-2"></i>
+                                    <p class="text-xs text-gray-600">Telegram</p>
+                                </div>
+                                <div class="social-icon-option border border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" data-platform="other">
+                                    <i class="fas fa-link text-2xl text-gray-500 mb-2"></i>
+                                    <p class="text-xs text-gray-600">Other</p>
+                                </div>
+                            </div>
+                            
+                            <div id="social-media-container" class="space-y-4">
+                                <!-- Social media links will be added here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="flex items-center justify-between pt-6">
+                            <a href="{% url 'app:dashboard' %}" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                Cancel
+                            </a>
+                            <div class="flex items-center space-x-3">
+                                <button type="submit" name="action" value="preview" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    Preview
+                                </button>
+                                <button type="submit" name="action" value="draft" id="save-draft-btn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors hidden">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Save as Draft
+                                </button>
+                                <button type="submit" name="action" value="publish" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    Publish
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Other card type forms will be added here -->
+                <div id="other-forms" class="card-type-form hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Coming Soon</h2>
+                        <p class="text-gray-500">This card type is not yet available.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let linkCount = 0;
+            let socialCount = 0;
+            const maxSocialLinks = 5;
+            let selectedCardType = '';
+            let selectedTemplate = null;
+            let addedSocialPlatforms = new Set();
+            
+            // Step management
+            const steps = {
+                'step-1': document.getElementById('step-1'),
+                'step-2': document.getElementById('step-2'),
+                'form-container': document.getElementById('form-container')
+            };
+            
+            // Card type selection
+            const cardTypeOptions = document.querySelectorAll('.card-type-option');
+            cardTypeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    selectedCardType = this.dataset.type;
+                    
+                    // Remove active state from all options
+                    cardTypeOptions.forEach(opt => {
+                        opt.classList.remove('border-primary', 'bg-primary/5');
+                        opt.classList.add('border-gray-200');
+                    });
+                    
+                    // Add active state to selected option
+                    this.classList.add('border-primary', 'bg-primary/5');
+                    this.classList.remove('border-gray-200');
+                    
+                    // Show template selection
+                    showStep('step-2');
+                    loadTemplates();
+                });
+            });
+            
+            // Back to type selection
+            document.getElementById('back-to-type').addEventListener('click', function() {
+                showStep('step-1');
+            });
+            
+            // Back to template selection
+            document.getElementById('back-to-template').addEventListener('click', function() {
+                showStep('step-2');
+            });
+            
+            function showStep(stepId) {
+                Object.values(steps).forEach(step => step.classList.add('hidden'));
+                steps[stepId].classList.remove('hidden');
+            }
+            
+            function loadTemplates() {
+                const templateGrid = document.getElementById('template-grid');
+                const templates = [
+                    {% for template in templates %}
+                    {
+                        id: {{ template.id }},
+                        name: "{{ template.name }}",
+                        description: "{{ template.description|default:'' }}"
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ];
+                
+                templateGrid.innerHTML = '';
+                
+                templates.forEach(template => {
+                    const templateCard = createTemplateCard(template);
+                    templateGrid.appendChild(templateCard);
+                });
+            }
+            
+            function createTemplateCard(template) {
+                const card = document.createElement('div');
+                card.className = 'template-option border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors';
+                card.dataset.templateId = template.id;
+                
+                // Create preview with dummy data
+                const previewData = getPreviewData(selectedCardType);
+                
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="font-medium text-gray-900 mb-2">${template.name}</h3>
+                        <p class="text-sm text-gray-500">${template.description || 'Clean and modern design'}</p>
+                    </div>
+                    <div class="template-preview bg-gray-100 rounded-lg p-4 mb-4">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-primary rounded-full mx-auto mb-3 flex items-center justify-center">
+                                <i class="fas fa-user text-white text-xl"></i>
+                            </div>
+                            <h4 class="font-medium text-gray-900 mb-2">${previewData.title}</h4>
+                            <p class="text-sm text-gray-600 mb-3">${previewData.subtitle}</p>
+                            <div class="space-y-2">
+                                ${previewData.links.map(link => `
+                                    <div class="bg-white rounded px-3 py-2 text-sm">
+                                        <i class="fas fa-link mr-2 text-gray-400"></i>
+                                        ${link}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-xs text-gray-500">Click to select</span>
+                    </div>
+                `;
+                
+                card.addEventListener('click', function() {
+                    selectTemplate(template);
+                });
+                
+                return card;
+            }
+            
+            function getPreviewData(cardType) {
+                const previews = {
+                    'link': {
+                        title: 'John Doe',
+                        subtitle: 'Software Developer & Designer',
+                        links: ['Portfolio', 'GitHub', 'LinkedIn', 'Contact']
+                    },
+                    'about': {
+                        title: 'About Me',
+                        subtitle: 'Passionate about creating amazing experiences',
+                        links: ['My Story', 'Skills', 'Experience']
+                    },
+                    'recommendation': {
+                        title: 'My Recommendations',
+                        subtitle: 'Tools and resources I love',
+                        links: ['Design Tools', 'Books', 'Courses']
+                    },
+                    'youtube': {
+                        title: 'My Channel',
+                        subtitle: 'Tech tutorials and reviews',
+                        links: ['Latest Video', 'Subscribe', 'Playlists']
+                    }
+                };
+                
+                return previews[cardType] || previews['link'];
+            }
+            
+            function selectTemplate(template) {
+                selectedTemplate = template;
+                
+                // Remove active state from all templates
+                document.querySelectorAll('.template-option').forEach(opt => {
+                    opt.classList.remove('border-primary', 'bg-primary/5');
+                    opt.classList.add('border-gray-200');
+                });
+                
+                // Add active state to selected template
+                event.currentTarget.classList.add('border-primary', 'bg-primary/5');
+                event.currentTarget.classList.remove('border-gray-200');
+                
+                // Set template ID in hidden field
+                document.getElementById('selected-template').value = template.id;
+                
+                // Show form
+                setTimeout(() => {
+                    showStep('form-container');
+                    showCardForm();
+                }, 300);
+            }
+            
+            function showCardForm() {
+                const linkCollectionForm = document.getElementById('link-collection-form');
+                const otherForms = document.getElementById('other-forms');
+                
+                if (selectedCardType === 'link') {
+                    linkCollectionForm.classList.remove('hidden');
+                    otherForms.classList.add('hidden');
+                    
+                    // Show save as draft button for pro users (simplified check)
+                    const isPro = {{ user.is_staff|yesno:"true,false" }};
+                    if (isPro) {
+                        document.getElementById('save-draft-btn').classList.remove('hidden');
+                    }
+                } else {
+                    linkCollectionForm.classList.add('hidden');
+                    otherForms.classList.remove('hidden');
+                }
+            }
+            
+            // Add link functionality
+            const addLinkBtn = document.getElementById('add-link-btn');
+            const linksContainer = document.getElementById('links-container');
+            const noLinksMessage = document.getElementById('no-links-message');
+            
+            addLinkBtn.addEventListener('click', function() {
+                addLinkForm();
+            });
+            
+            function addLinkForm() {
+                linkCount++;
+                const linkForm = createLinkForm(linkCount);
+                linksContainer.appendChild(linkForm);
+                noLinksMessage.classList.add('hidden');
+            }
+            
+            function createLinkForm(index) {
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'border border-gray-200 rounded-lg p-4 bg-gray-50';
+                linkDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-medium text-gray-900">Link ${index}</h3>
+                        <button type="button" class="remove-link-btn text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <input type="text" name="links[${index}][title]" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Link title">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                            <input type="url" name="links[${index}][url]" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="https://example.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Button Text (optional)</label>
+                            <input type="text" name="links[${index}][link_text]"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Button text">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Image (optional)</label>
+                            <input type="file" name="links[${index}][image]" accept="image/*"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                            <textarea name="links[${index}][description]" rows="2"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      placeholder="Link description"></textarea>
+                        </div>
+                    </div>
+                `;
+                
+                // Add remove functionality
+                const removeBtn = linkDiv.querySelector('.remove-link-btn');
+                removeBtn.addEventListener('click', function() {
+                    linkDiv.remove();
+                    linkCount--;
+                    if (linkCount === 0) {
+                        noLinksMessage.classList.remove('hidden');
+                    }
+                });
+                
+                return linkDiv;
+            }
+            
+            // Social media icon selection
+            const socialIconOptions = document.querySelectorAll('.social-icon-option');
+            const socialContainer = document.getElementById('social-media-container');
+            
+            socialIconOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const platform = this.dataset.platform;
+                    
+                    if (addedSocialPlatforms.has(platform)) {
+                        return; // Already added
+                    }
+                    
+                    if (socialCount >= maxSocialLinks) {
+                        alert(`Maximum ${maxSocialLinks} social media links allowed`);
+                        return;
+                    }
+                    
+                    addSocialMedia(platform);
+                });
+            });
+            
+            function addSocialMedia(platform) {
+                socialCount++;
+                addedSocialPlatforms.add(platform);
+                
+                const socialForm = createSocialForm(platform, socialCount);
+                socialContainer.appendChild(socialForm);
+                
+                // Update icon appearance
+                const iconOption = document.querySelector(`[data-platform="${platform}"]`);
+                iconOption.classList.add('border-primary', 'bg-primary/5');
+                iconOption.classList.remove('border-gray-200');
+            }
+            
+            function createSocialForm(platform, index) {
+                const socialDiv = document.createElement('div');
+                socialDiv.className = 'border border-gray-200 rounded-lg p-4 bg-gray-50';
+                socialDiv.dataset.platform = platform;
+                socialDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fab fa-${platform} text-2xl text-gray-600"></i>
+                            <h3 class="font-medium text-gray-900">${platform.charAt(0).toUpperCase() + platform.slice(1)}</h3>
+                        </div>
+                        <button type="button" class="remove-social-btn text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                        <input type="url" name="social[${index}][url]" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="https://example.com">
+                        <input type="hidden" name="social[${index}][platform]" value="${platform}">
+                    </div>
+                `;
+                
+                // Add remove functionality
+                const removeBtn = socialDiv.querySelector('.remove-social-btn');
+                removeBtn.addEventListener('click', function() {
+                    socialDiv.remove();
+                    socialCount--;
+                    addedSocialPlatforms.delete(platform);
+                    
+                    // Reset icon appearance
+                    const iconOption = document.querySelector(`[data-platform="${platform}"]`);
+                    iconOption.classList.remove('border-primary', 'bg-primary/5');
+                    iconOption.classList.add('border-gray-200');
+                });
+                
+                return socialDiv;
+            }
+        });
+    </script>
+</body>
+</html>
+
+- i

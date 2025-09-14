@@ -38,7 +38,7 @@ SECRET_KEY = env('SECRET_KEY', default="django-insecure-%3vx!kn$vnx$sd521u4m_bbu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.infikar.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.infikar.com', 'testserver']
 
 
 # Application definition
@@ -182,6 +182,11 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+# Login URLs
+LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/app/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
 
 SITE_ID = 1
 
