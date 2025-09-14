@@ -5,89 +5,269 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@{{ profile_user.username }} - Infikar</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </head>
 <body class="bg-gray-50">
     <div class="min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-6">
+            <div class="max-w-xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
                     <div class="flex items-center">
-                        <a href="{% url 'cards:home' %}" class="text-2xl font-bold text-gray-900">Infikar</a>
+                        <a href="{% url 'cards:home' %}" class="text-xl font-bold text-gray-900">Infikar</a>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <a href="{% url 'cards:home' %}" class="text-gray-700 hover:text-gray-900">← Back to Home</a>
+                        <a href="{% url 'cards:home' %}" class="text-gray-700 hover:text-gray-900 text-sm">← Back</a>
                     </div>
                 </div>
             </div>
         </header>
 
         <!-- Profile Header -->
-        <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-                <div class="flex items-center mb-6">
-                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
+        <main class="max-w-xl mx-auto px-4 py-6">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
                         {{ profile_user.first_name.0 }}{{ profile_user.last_name.0 }}
                     </div>
-                    <div class="ml-6">
-                        <h1 class="text-3xl font-bold text-gray-900">@{{ profile_user.username }}</h1>
-                        <p class="text-xl text-gray-600">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
-                        {% if profile_user.bio %}
-                        <p class="text-gray-600 mt-2">{{ profile_user.bio }}</p>
-                        {% endif %}
-                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">@{{ profile_user.username }}</h1>
+                    <p class="text-lg text-gray-600">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+                    {% if profile_user.bio %}
+                    <p class="text-gray-600 mt-2 text-sm">{{ profile_user.bio }}</p>
+                    {% endif %}
                 </div>
                 
                 <!-- Social Links -->
                 {% if profile_user.profile %}
-                <div class="flex flex-wrap gap-4">
+                <div class="flex flex-wrap justify-center gap-3 text-sm">
                     {% if profile_user.profile.website %}
-                    <a href="{{ profile_user.profile.website }}" class="text-blue-600 hover:text-blue-800">Website</a>
+                    <a href="{{ profile_user.profile.website }}" class="text-blue-600 hover:text-blue-800 px-3 py-1 bg-blue-50 rounded-full">Website</a>
                     {% endif %}
                     {% if profile_user.profile.twitter %}
-                    <a href="{{ profile_user.profile.twitter }}" class="text-blue-400 hover:text-blue-600">Twitter</a>
+                    <a href="{{ profile_user.profile.twitter }}" class="text-blue-400 hover:text-blue-600 px-3 py-1 bg-blue-50 rounded-full">Twitter</a>
                     {% endif %}
                     {% if profile_user.profile.instagram %}
-                    <a href="{{ profile_user.profile.instagram }}" class="text-pink-500 hover:text-pink-700">Instagram</a>
+                    <a href="{{ profile_user.profile.instagram }}" class="text-pink-500 hover:text-pink-700 px-3 py-1 bg-pink-50 rounded-full">Instagram</a>
                     {% endif %}
                     {% if profile_user.profile.youtube %}
-                    <a href="{{ profile_user.profile.youtube }}" class="text-red-600 hover:text-red-800">YouTube</a>
+                    <a href="{{ profile_user.profile.youtube }}" class="text-red-600 hover:text-red-800 px-3 py-1 bg-red-50 rounded-full">YouTube</a>
                     {% endif %}
                     {% if profile_user.profile.github %}
-                    <a href="{{ profile_user.profile.github }}" class="text-gray-600 hover:text-gray-800">GitHub</a>
+                    <a href="{{ profile_user.profile.github }}" class="text-gray-600 hover:text-gray-800 px-3 py-1 bg-gray-50 rounded-full">GitHub</a>
                     {% endif %}
                 </div>
                 {% endif %}
             </div>
 
-            <!-- Cards Grid -->
+            <!-- Cards Slideshow -->
             {% if cards %}
-            <div class="grid grid-cols-1 gap-6">
-                {% for card in cards %}
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-semibold text-gray-900">{{ card.title }}</h2>
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                            {{ card.get_card_type_display }}
-                        </span>
+            <div class="swiper-container" style="overflow: hidden;">
+                <div class="swiper-wrapper">
+                    {% for card in cards %}
+                    <div class="swiper-slide" data-card-slug="{{ card.slug }}">
+                        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <!-- Card Header -->
+                    <div class="text-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ card.title }}</h2>
+                        <div class="flex justify-center space-x-2">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                {{ card.get_card_type_display }}
+                            </span>
+                            {% if card.is_draft %}
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Draft</span>
+                            {% endif %}
+                        </div>
                     </div>
-                    
-                    <div class="mb-4">
-                        <p class="text-gray-600">Template: {{ card.template.name }}</p>
-                        <p class="text-sm text-gray-500">Created: {{ card.created_at|date:"M d, Y" }}</p>
+
+                    <!-- Card Content based on type -->
+                    {% if card.card_type == 'link' %}
+                        <!-- Link Content -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Links</h3>
+                            {% for link in card.link_contents.all %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <h4 class="text-lg font-medium text-gray-900">{{ link.title }}</h4>
+                                {% if link.description %}
+                                <p class="text-gray-600 mt-1">{{ link.description }}</p>
+                                {% endif %}
+                                <a href="{{ link.url }}" 
+                                   class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    {{ link.link_text|default:"Visit Link" }}
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    {% elif card.card_type == 'about' %}
+                        <!-- About Content -->
+                        {% for about in card.about_contents.all %}
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-gray-900">{{ about.heading }}</h3>
+                                <p class="text-lg text-gray-600 mt-2">{{ about.subheading }}</p>
+                            </div>
+                            <div class="prose max-w-none">
+                                <p class="text-gray-700 text-lg leading-relaxed">{{ about.short_description }}</p>
+                            </div>
+                            {% if about.link_url %}
+                            <div class="text-center">
+                                <a href="{{ about.link_url }}" 
+                                   class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                                    {{ about.link_text|default:"Learn More" }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                    {% elif card.card_type == 'recommendation' %}
+                        <!-- Recommendation Content -->
+                        {% for rec in card.recommendation_contents.all %}
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-gray-900">{{ rec.title }}</h3>
+                                <p class="text-lg text-gray-600 mt-2">{{ rec.subtitle }}</p>
+                                <p class="text-gray-500 mt-4">{{ rec.subscription_text }}</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {% for pick in rec.picks.all %}
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <h4 class="text-lg font-semibold text-gray-900">{{ pick.title }}</h4>
+                                    <p class="text-gray-600 mt-2">{{ pick.description }}</p>
+                                    {% if pick.link_url %}
+                                    <a href="{{ pick.link_url }}" 
+                                       class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                        {{ pick.link_text|default:"Check it out" }}
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    {% elif card.card_type == 'splash' %}
+                        <!-- Splash Content -->
+                        {% for splash in card.splash_contents.all %}
+                        <div class="text-center space-y-6">
+                            <h3 class="text-3xl font-bold text-gray-900">{{ splash.heading }}</h3>
+                            <p class="text-xl text-gray-600">{{ splash.subheading }}</p>
+                            <p class="text-gray-700 text-lg">{{ splash.description }}</p>
+                            {% if splash.link_url %}
+                            <div>
+                                <a href="{{ splash.link_url }}" 
+                                   class="inline-block bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700">
+                                    {{ splash.link_text|default:"Get Started" }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                    {% elif card.card_type == 'youtube' %}
+                        <!-- YouTube Content -->
+                        {% for youtube in card.youtube_contents.all %}
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-gray-900">{{ youtube.title }}</h3>
+                                <p class="text-lg text-gray-600 mt-2">{{ youtube.subtitle }}</p>
+                                <p class="text-gray-700 mt-4">{{ youtube.description }}</p>
+                            </div>
+                            <div class="text-center">
+                                <a href="{{ youtube.channel_url }}" 
+                                   class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
+                                    {{ youtube.button_label|default:"Subscribe" }}
+                                </a>
+                            </div>
+                            {% if youtube.videos.exists %}
+                            <div class="mt-8">
+                                <h4 class="text-xl font-semibold text-gray-900 mb-4">Latest Videos</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {% for video in youtube.videos.all %}
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                        <h5 class="font-medium text-gray-900">{{ video.title }}</h5>
+                                        <a href="{{ video.video_url }}" 
+                                           class="inline-block mt-2 text-blue-600 hover:text-blue-800">
+                                            Watch Video →
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                    {% else %}
+                        <!-- Default content -->
+                        <div class="text-center">
+                            <h3 class="text-2xl font-bold text-gray-900">{{ card.title }}</h3>
+                            <p class="text-gray-600 mt-4">This card type is not yet implemented.</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Card Footer -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <span>Template: {{ card.template.name }}</span>
+                            <span>Updated: {{ card.updated_at|date:"M d, Y" }}</span>
+                        </div>
                     </div>
-                    
-                    <div class="flex space-x-4">
-                        <a href="{% url 'cards:card_detail' username=profile_user.username card_slug=card.slug %}" 
-                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                            View Card
-                        </a>
-                        {% if card.is_draft %}
-                        <span class="px-3 py-2 bg-yellow-100 text-yellow-800 text-sm rounded-lg">Draft</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Marketing Card for New Users -->
+                        {% if not profile_user.is_pro_user %}
+                        <div class="swiper-slide" data-card-slug="create-your-bio-site">
+                            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-md p-6 text-white">
+                                <!-- Marketing Card Header -->
+                                <div class="text-center mb-6">
+                                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                        </svg>
+                                    </div>
+                                    <h2 class="text-xl font-bold mb-2">Create Your Bio Site</h2>
+                                    <p class="text-blue-100 text-sm">Join thousands of creators</p>
+                                </div>
+
+                                <!-- Marketing Content -->
+                                <div class="space-y-4">
+                                    <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                                        <h3 class="font-semibold mb-2">🚀 Why Choose Infikar?</h3>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Easy drag & drop builder</li>
+                                            <li>• Mobile-first design</li>
+                                            <li>• Multiple card types</li>
+                                            <li>• Social media integration</li>
+                                            <li>• Analytics & insights</li>
+                                            <li>• Free to get started</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="text-center">
+                                        <a href="/app/register/" 
+                                           class="inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                                            Create Your Site
+                                        </a>
+                                        <p class="text-xs text-blue-100 mt-2">Free forever • No credit card required</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         {% endif %}
-                    </div>
                 </div>
-                {% endfor %}
+                
+                <!-- Swiper Navigation -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                
+                <!-- Swiper Pagination -->
+                <div class="swiper-pagination"></div>
             </div>
             {% else %}
             <div class="bg-white rounded-lg shadow-md p-8 text-center">
@@ -103,13 +283,151 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-gray-800 mt-16">
-            <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <footer class="bg-gray-800 mt-8">
+            <div class="max-w-xl mx-auto py-6 px-4">
                 <div class="text-center">
-                    <p class="text-gray-400">&copy; 2024 Infikar. All rights reserved.</p>
+                    <p class="text-gray-400 text-sm">&copy; 2024 Infikar. All rights reserved.</p>
                 </div>
             </div>
         </footer>
     </div>
+
+    <!-- Swiper JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const swiperContainer = document.querySelector('.swiper-container');
+            if (!swiperContainer) return; // Exit if no slideshow
+            
+            // Get all card slugs
+            const cardSlugs = Array.from(document.querySelectorAll('.swiper-slide')).map(slide => slide.dataset.cardSlug);
+            
+            // Initialize from URL hash or path
+            const hash = window.location.hash;
+            const path = window.location.pathname;
+            let initialSlide = 0;
+            
+            // Check if we're on a specific card page (e.g., /@username/card-slug/)
+            const cardSlugFromPath = path.split('/').pop();
+            if (cardSlugFromPath && cardSlugFromPath !== '' && cardSlugs.includes(cardSlugFromPath)) {
+                initialSlide = cardSlugs.indexOf(cardSlugFromPath);
+            }
+            // Check URL hash (e.g., #card-slug)
+            else if (hash) {
+                const cardSlugFromHash = hash.replace('#', '');
+                if (cardSlugs.includes(cardSlugFromHash)) {
+                    initialSlide = cardSlugs.indexOf(cardSlugFromHash);
+                }
+            }
+            
+            // Debug: Log card slugs
+            console.log('Card slugs:', cardSlugs);
+            console.log('Initial slide:', initialSlide);
+            
+            // Initialize Swiper
+            const swiper = new Swiper('.swiper-container', {
+                // Swiper options
+                initialSlide: initialSlide,
+                spaceBetween: 0,
+                centeredSlides: false,
+                slidesPerView: 1,
+                slidesPerGroup: 1,
+                loop: false,
+                
+                // Navigation arrows
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                
+                // Pagination dots
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    dynamicBullets: false,
+                },
+                
+                // Keyboard control
+                keyboard: {
+                    enabled: true,
+                    onlyInViewport: true,
+                },
+                
+                // Touch/Swipe
+                touchRatio: 1,
+                touchAngle: 45,
+                grabCursor: true,
+                allowTouchMove: true,
+                
+                // Events
+                on: {
+                    slideChange: function() {
+                        // Update URL hash when slide changes
+                        const currentSlug = cardSlugs[this.activeIndex];
+                        console.log('Slide changed to:', this.activeIndex, 'Slug:', currentSlug);
+                        if (currentSlug) {
+                            window.history.replaceState(null, null, `#${currentSlug}`);
+                        }
+                    },
+                    init: function() {
+                        console.log('Swiper initialized with', this.slides.length, 'slides');
+                    }
+                }
+            });
+            
+            // Custom styling for navigation buttons
+            const style = document.createElement('style');
+            style.textContent = `
+                .swiper-button-next,
+                .swiper-button-prev {
+                    color: #4B5563;
+                    background: white;
+                    border-radius: 50%;
+                    width: 44px;
+                    height: 44px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    transition: all 0.3s ease;
+                }
+                
+                .swiper-button-next:hover,
+                .swiper-button-prev:hover {
+                    background: #F3F4F6;
+                    transform: scale(1.1);
+                }
+                
+                .swiper-button-next:after,
+                .swiper-button-prev:after {
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+                
+                .swiper-pagination-bullet {
+                    background: #D1D5DB;
+                    opacity: 1;
+                    width: 8px;
+                    height: 8px;
+                }
+                
+                .swiper-pagination-bullet-active {
+                    background: #4B5563;
+                }
+                
+                .swiper-pagination {
+                    position: relative;
+                    margin-top: 20px;
+                }
+                
+                .swiper-container {
+                    width: 100%;
+                    height: auto;
+                }
+                
+                .swiper-slide {
+                    width: 100%;
+                    height: auto;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
 </body>
 </html>

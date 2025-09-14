@@ -20,9 +20,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from infikar.accounts.views import DashboardView
+from infikar.health import health_check
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # Health check
+    path("health/", health_check, name="health_check"),
     
     # Authentication URLs
     path("accounts/", include("allauth.urls")),

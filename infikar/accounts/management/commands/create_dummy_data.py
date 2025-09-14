@@ -1,13 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from accounts.models import UserProfile
-from cards.models import (
+from infikar.accounts.models import UserProfile
+from infikar.cards.models import (
     CardTemplate, Card, LinkContent, AboutContent, 
     RecommendationContent, RecommendationPick, SplashContent, 
     YouTubeContent, YouTubeVideo
 )
-from subscriptions.models import SubscriptionPlan
+from infikar.subscriptions.models import SubscriptionPlan
 import random
 from datetime import timedelta
 

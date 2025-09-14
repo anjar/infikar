@@ -108,17 +108,23 @@ WSGI_APPLICATION = "infikar.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Database configuration
+# Use MySQL for production, SQLite for development
+if env('DATABASE_URL', default=None):
+    DATABASES = {
+        "default": env.db()
     }
-}
-
-# For production, use MySQL
-# DATABASES = {
-#     "default": env.db()
-# }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": env('DATABASE_NAME', default='infikar'),
+            "USER": env('DATABASE_USER', default='infikar'),
+            "PASSWORD": env('DATABASE_PASSWORD', default='infikar123'),
+            "HOST": env('DATABASE_HOST', default='127.0.0.1'),
+            "PORT": env('DATABASE_PORT', default='3306'),
+        }
+    }
 
 
 # Password validation

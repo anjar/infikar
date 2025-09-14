@@ -19,7 +19,7 @@ poetry run python manage.py migrate
 # Create superuser if it doesn't exist
 echo "👤 Creating superuser..."
 poetry run python manage.py shell -c "
-from accounts.models import User
+from infikar.accounts.models import User
 if not User.objects.filter(username='admin').exists():
     User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
     print('Superuser created: admin/admin123')
@@ -30,8 +30,8 @@ else:
 # Create some sample data
 echo "📊 Creating sample data..."
 poetry run python manage.py shell -c "
-from cards.models import CardTemplate
-from accounts.models import User
+from infikar.cards.models import CardTemplate
+from infikar.accounts.models import User
 
 # Create default templates
 templates = [
